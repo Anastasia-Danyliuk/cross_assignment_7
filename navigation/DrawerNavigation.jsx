@@ -9,7 +9,7 @@ const Drawer = createDrawerNavigator();
 export default function DrawerNavigator() {
     return (
         <Drawer.Navigator screenOptions={{ headerShown: false }}>
-            <Drawer.Screen name="HomeTabs" component={BottomTabs} />
+            <Drawer.Screen name="Home" component={BottomTabs} />
             <Drawer.Screen name="Support" component={SupportScreen}  options={{headerShown: true, title: "Support"}}/>
         </Drawer.Navigator>
     );
