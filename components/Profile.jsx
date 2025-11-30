@@ -1,7 +1,12 @@
-import React from 'react';
+import React, {useContext} from 'react';
 import {View, Text, Image, ScrollView, StyleSheet, TouchableOpacity} from 'react-native';
+import { ThemeContext } from "../context/ThemeContext";
+
 
 export default function LibraryScreen() {
+
+    const { theme } = useContext(ThemeContext);
+    const isDark = theme === 'dark';
 
     const handlePress = () => {
         console.log("Pressed");
@@ -14,25 +19,34 @@ export default function LibraryScreen() {
                     style={styles.profilImg}
                     source={require('../assets/Profile.png')}
                 />
-                <Text style={styles.name}>Anna Lindemann</Text>
-                <Text style={styles.id}>@lindemaaaan87</Text>
+                <Text style={[styles.name, { color: isDark ? '#fff' : '#1F2024' }]}>
+                    Anna Lindemann
+                </Text>
+
+                <Text style={[styles.id, { color: isDark ? '#ccc' : '#71727A' }]}>
+                    @lindemaaaan87
+                </Text>
             </View>
 
             <View style={styles.settingsBlock}>
-                <TouchableOpacity style={styles.settingItem} onPress={() => console.log("Notifications")} activeOpacity={0.7}>
-                    <Text>Notifications</Text>
+                <TouchableOpacity style={styles.settingItem} activeOpacity={0.7}>
+                    <Text style={{color: isDark ? '#fff' : '#1F2024'}}>Notifications</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.settingItem} onPress={() => console.log("Appearance")} activeOpacity={0.7}>
-                    <Text>Appearance</Text>
+
+                <TouchableOpacity style={styles.settingItem} activeOpacity={0.7}>
+                    <Text style={{color: isDark ? '#fff' : '#1F2024'}}>Appearance</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.settingItem} onPress={() => console.log("Language")} activeOpacity={0.7}>
-                    <Text>Language</Text>
+
+                <TouchableOpacity style={styles.settingItem} activeOpacity={0.7}>
+                    <Text style={{color: isDark ? '#fff' : '#1F2024'}}>Language</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.settingItem} onPress={() => console.log("Privacy & Security")} activeOpacity={0.7}>
-                    <Text>Privacy & Security</Text>
+
+                <TouchableOpacity style={styles.settingItem} activeOpacity={0.7}>
+                    <Text style={{color: isDark ? '#fff' : '#1F2024'}}>Privacy & Security</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.settingItem} onPress={() => console.log("Log Out")} activeOpacity={0.7}>
-                    <Text>Log Out</Text>
+
+                <TouchableOpacity style={styles.settingItem} activeOpacity={0.7}>
+                    <Text style={{color: isDark ? '#fff' : '#1F2024'}}>Log Out</Text>
                 </TouchableOpacity>
             </View>
 

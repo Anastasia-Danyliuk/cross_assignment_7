@@ -1,20 +1,18 @@
+import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-import { View, StyleSheet } from 'react-native';
 import StackNavigation from './navigation/StackNavigation';
+import { Provider } from 'react-redux';
+import { store } from './redux/store';
+import ThemeProvider from './context/ThemeContext';
 
 export default function App() {
     return (
-        <View style={styles.container}>
-            <NavigationContainer>
-                <StackNavigation />
-            </NavigationContainer>
-        </View>
+        <Provider store={store}>
+            <ThemeProvider>
+                <NavigationContainer>
+                    <StackNavigation />
+                </NavigationContainer>
+            </ThemeProvider>
+        </Provider>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#F0F0F0',
-    },
-});

@@ -1,35 +1,68 @@
-import React, { useEffect, useState } from "react";
-import {View, Text, StyleSheet, ActivityIndicator, FlatList} from "react-native";
+import React, {useContext, useEffect, useState} from "react";
+import { View, Text, StyleSheet, ActivityIndicator, FlatList } from "react-native";
+import { useSelector, useDispatch } from "react-redux";
 import { getDeezerTracks } from "../api/api";
 import Switcher from "../components/Switcher";
 import LineSongCard from "../components/LineSongCard";
 import SongCard from "../components/SongCard";
+import { ThemeContext } from "../context/ThemeContext";
+import { removeFromFavorites, removeFromSaved } from "../redux/tracksSlice";
+
 
 export default function LibraryScreen() {
-
     const [activeTab, setActiveTab] = useState("Saved");
     const [tracks, setTracks] = useState([]);
     const [loading, setLoading] = useState(true);
+
     const [error, setError] = useState(null);
 
+    const { theme } = useContext(ThemeContext);
+    const isDark = theme === "dark";
+
+    const dispatch = useDispatch();
+
+    const favorites = useSelector(state => (state.tracks && state.tracks.favorites) ? state.tracks.favorites : []);
+    const saved = useSelector(state => (state.tracks && state.tracks.saved) ? state.tracks.saved : []);
+
     useEffect(() => {
-        async function loadTracks() {
+        async function load() {
             try {
                 const data = await getDeezerTracks();
-                setTracks(data);
+                if (Array.isArray(data)) {
+                    setTracks(data);
+                } else {
+                    setTracks([]);
+                }
             } catch (e) {
                 setError("Loading error");
             } finally {
                 setLoading(false);
             }
         }
-
-        loadTracks();
+        load();
     }, []);
+
+    function mapTrack(track, index) {
+        const id = track && track.id ? String(track.id) : "tmp_" + index;
+        const title = track && (track.title || track.name) ? (track.title || track.name) : "Unknown";
+        const singer = track && (track.singer || (track.artist && track.artist.name)) ? (track.singer || track.artist.name) : "Unknown";
+        const imgUrl = track && (track.imgUrl || (track.album && track.album.cover_big)) ? (track.imgUrl || track.album.cover_big) : "";
+        const songUrl = track && (track.songUrl || track.link) ? (track.songUrl || track.link) : "";
+
+        return { id, title, singer, imgUrl, songUrl };
+    }
+
+    const handleRemoveFromSaved = (trackId) => {
+        dispatch(removeFromSaved(trackId));
+    };
+
+    const handleRemoveFromFavorites = (trackId) => {
+        dispatch(removeFromFavorites(trackId));
+    };
 
     if (loading) {
         return (
-            <View style={styles.center}>
+            <View style={[styles.center, { backgroundColor: isDark ? "#444444" : "#fff" }]}>
                 <ActivityIndicator size="large" />
             </View>
         );
@@ -37,110 +70,86 @@ export default function LibraryScreen() {
 
     if (error) {
         return (
-            <View style={styles.center}>
+            <View style={[styles.center, { backgroundColor: isDark ? "#444444" : "#fff" }]}>
                 <Text>{error}</Text>
             </View>
         );
     }
 
-    let content = null;
+    function renderContent() {
+        let data = [];
+        let emptyMessage = "Any songs";
+        let onRemoveHandler = null;
 
-    if (activeTab === "Saved") {
-        content = (
-            <FlatList
-                data={tracks.slice(0, 10)}
-                keyExtractor={(item) => item.id.toString()}
-                renderItem={({ item }) => (
-                    <LineSongCard
-                        title={item.title}
-                        singer={item.artist.name}
-                        imgUrl={item.album.cover}
-                        songUrl={item.link}
-                    />
-                )}
-                contentContainerStyle={styles.savedList}
-            />
-        );
-    }
+        if (activeTab === "Saved") {
+            data = Array.isArray(saved) ? saved.map(mapTrack) : [];
+            emptyMessage = "Any saved songs";
+            onRemoveHandler = handleRemoveFromSaved;
+        } else if (activeTab === "Liked") {
+            data = Array.isArray(favorites) ? favorites.map(mapTrack) : [];
+            emptyMessage = "Any liked songs";
+            onRemoveHandler = handleRemoveFromFavorites;
+        } else if (activeTab === "Albums") {
+            data = Array.isArray(tracks) ? tracks.slice(0, 8).map(mapTrack) : [];
+            emptyMessage = "Any albums";
+        }
 
-    if (activeTab === "Liked") {
-        content = (
-            <FlatList
-                data={tracks.slice(10, 20)}
-                keyExtractor={(item) => item.id.toString()}
-                renderItem={({ item }) => (
-                    <LineSongCard
-                        title={item.title}
-                        singer={item.artist.name}
-                        imgUrl={item.album.cover}
-                        songUrl={item.link}
-                    />
-                )}
-                contentContainerStyle={styles.likedList}
-            />
-        );
-    }
+        if (!Array.isArray(data) || data.length === 0) {
+            return (
+                <View style={styles.center}>
+                    <Text>{emptyMessage}</Text>
+                </View>
+            );
+        }
 
-    if (activeTab === "Albums") {
-        content = (
+        return (
             <FlatList
-                horizontal
-                data={tracks.slice(0, 8)}
-                keyExtractor={(item) => item.id.toString()}
-                renderItem={({ item }) => (
-                    <View style={styles.albumItem}>
-                        <SongCard
-                            title={item.title}
-                            singer={item.artist.name}
-                            imgUrl={item.album.cover_big}
-                            songUrl={item.link}
-                        />
-                    </View>
-                )}
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.albumList}
+                horizontal={activeTab === "Albums"}
+                data={data}
+                keyExtractor={(item, index) => (item && item.id ? item.id : "item") + "_" + index}
+                ItemSeparatorComponent={() => <View style={{ width: 15 }} />}
+                renderItem={({ item }) => {
+                    if (activeTab === "Albums") {
+                        return <SongCard id={item.id} title={item.title} singer={item.singer} imgUrl={item.imgUrl} songUrl={item.songUrl}/>;
+                    } else {
+                        return (
+                            <LineSongCard
+                                id={item.id}
+                                title={item.title}
+                                singer={item.singer}
+                                imgUrl={item.imgUrl}
+                                songUrl={item.songUrl}
+                                onRemove={onRemoveHandler}
+                            />
+                        );
+                    }
+                }}
             />
         );
     }
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { backgroundColor: isDark ? "#444444" : "#fff" }]}>
             <Switcher activeTab={activeTab} setActiveTab={setActiveTab} />
-            <View style={styles.contentWrapper}>{content}</View>
+            <View style={styles.contentWrapper}>
+                {renderContent()}
+            </View>
         </View>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
-        padding: 20,
         flex: 1,
+        padding: 20
     },
-
+    contentWrapper: {
+        flex: 1,
+        marginTop: 20,
+    },
     center: {
         flex: 1,
         justifyContent: "center",
-        alignItems: "center",
-    },
-
-    contentWrapper: {
-        marginTop: 30,
-        flex: 1,
-    },
-
-    savedList: {
-        gap: 20,
-    },
-
-    likedList: {
-        gap: 20,
-    },
-
-    albumList: {
-        paddingRight: 14,
-    },
-
-    albumItem: {
-        marginRight: 14,
+        alignItems: "center"
     },
 });

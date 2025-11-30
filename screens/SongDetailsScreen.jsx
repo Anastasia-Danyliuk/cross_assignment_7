@@ -1,10 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, {useContext, useEffect, useState} from "react";
 import { View, Text, Image, StyleSheet, ActivityIndicator } from "react-native";
 import axios from "axios";
+import { ThemeContext } from "../context/ThemeContext";
 
 export default function SongDetailsScreen({ route }) {
     const { id } = route.params;
     const [song, setSong] = useState(null);
+    const { theme } = useContext(ThemeContext);
+    const isDark = theme === "dark";
 
     useEffect(() => {
         axios
@@ -18,14 +21,13 @@ export default function SongDetailsScreen({ route }) {
     }
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { backgroundColor: isDark ? "#444444" : "#fff" }]}>
             <Image source={{ uri: song.album.cover_big }} style={styles.cover} />
-            <Text style={styles.title}>{song.title}</Text>
-            <Text style={styles.artist}>{song.artist.name}</Text>
-            <Text style={styles.info}>Duration: {song.duration} sec</Text>
-            <Text style={styles.info}>Rank: {song.rank}</Text>
-        </View>
-    );
+            <Text style={[styles.title, { color: isDark ? "#fff" : "#000" }]}>{song.title}</Text>
+            <Text style={[styles.artist, { color: isDark ? "#ccc" : "#111" }]}>{song.artist.name}</Text>
+            <Text style={[styles.info, { color: isDark ? "#ccc" : "#555" }]}>Duration: {song.duration} sec</Text>
+            <Text style={[styles.info, { color: isDark ? "#ccc" : "#555" }]}>Rank: {song.rank}</Text>
+        </View> );
 }
 
 const styles = StyleSheet.create({

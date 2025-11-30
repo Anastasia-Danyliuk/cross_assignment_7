@@ -1,22 +1,25 @@
-import React from 'react';
+import React, {useContext} from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { ThemeContext } from "../context/ThemeContext";
+
 
 export default function SupportScreen({ navigation }) {
+    const { theme } = useContext(ThemeContext);
+    const isDark = theme === "dark";
     return (
-        <View style={styles.container}>
-            <TouchableOpacity
-                style={styles.backButton}
-                onPress={() => navigation.goBack()}
-            >
-                <Text style={styles.backText}>Main Page</Text>
+        <View style={[styles.container, { backgroundColor: isDark ? "#444444" : "#fff" }]}>
+            <TouchableOpacity style={[styles.backButton, { backgroundColor: isDark ? "#222" : "#eee" }]}
+                              onPress={() => navigation.goBack()} >
+                <Text style={[styles.backText, { color: isDark ? "#fff" : "#444444" }]}>
+                    Main Page
+                </Text>
             </TouchableOpacity>
-
-            <Text style={styles.title}>Support</Text>
-            <Text style={styles.subtitle}>
+            <Text style={[styles.title, { color: isDark ? "#fff" : "#444444" }]}>Support</Text>
+            <Text style={[styles.subtitle, { color: isDark ? "#ccc" : "#555" }]}>
                 If you have any issues, please contact us.
             </Text>
         </View>
-    );
+    )
 }
 
 const styles = StyleSheet.create({

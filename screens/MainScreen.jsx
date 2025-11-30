@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import { ScrollView, Text, View, StyleSheet, SafeAreaView, TouchableOpacity, Image, ActivityIndicator } from "react-native";
 import SearchBar from '../components/SearchBar';
 import SongCard from '../components/SongCard';
 import LineSongCard from '../components/LineSongCard';
+import { ThemeContext } from "../context/ThemeContext";
 
 import { getDeezerTracks } from "../api/api";
 
@@ -14,6 +15,9 @@ export default function MainScreen({ navigation }) {
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+
+    const { theme } = useContext(ThemeContext);
+    const isDark = theme === "dark";
 
     useEffect(() => {
         async function loadData() {
@@ -37,21 +41,21 @@ export default function MainScreen({ navigation }) {
 
     if (loading) {
         return (
-            <SafeAreaView style={styles.center}>
+            <SafeAreaView style={[styles.center, { backgroundColor: isDark ? "#444444" : "#fff" }]}>
                 <ActivityIndicator size="large" />
             </SafeAreaView>
         );
     }
     if (error) {
         return (
-            <SafeAreaView style={styles.center}>
+            <SafeAreaView style={[styles.center, { backgroundColor: isDark ? "#444444" : "#fff" }]}>
                 <Text>{error}</Text>
             </SafeAreaView>
         );
     }
 
     return (
-        <SafeAreaView style={styles.safe}>
+        <SafeAreaView style={[styles.safe, { backgroundColor: isDark ? "#444444" : "#fff" }]}>
             <ScrollView
                 style={styles.screen}
                 horizontal={false}
@@ -80,7 +84,7 @@ export default function MainScreen({ navigation }) {
                     </View>
                 </View>
 
-                <Text style={styles.section}>Perfect for you</Text>
+                <Text style={[styles.section, { color: isDark ? "#E5E5E5" : "#000" }]}>Perfect for you</Text>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.container}>
                     {perfect.map(item => (
                         <View key={item.id} style={styles.card}>
@@ -94,7 +98,7 @@ export default function MainScreen({ navigation }) {
                     ))}
                 </ScrollView>
 
-                <Text style={styles.section}>On Repeat</Text>
+                <Text style={[styles.section, { color: isDark ? "#E5E5E5" : "#000" }]}>On Repeat</Text>
                 <View style={styles.cardLine}>
                     {repeat.map(item => (
                         <LineSongCard
@@ -107,7 +111,7 @@ export default function MainScreen({ navigation }) {
                     ))}
                 </View>
 
-                <Text style={styles.section}>On Trend</Text>
+                <Text style={[styles.section, { color: isDark ? "#E5E5E5" : "#000" }]}>On Trend</Text>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.container}>
                     {perfect.map(item => (
                         <View key={item.id} style={styles.card}>
